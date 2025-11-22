@@ -1,1 +1,0 @@
-docker build -t kor_med_qa_benchmark .

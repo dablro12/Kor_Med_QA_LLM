@@ -1,0 +1,55 @@
+{
+    "aihub_필수의료_의학지식_데이터": {
+        "train": {
+            "file_path": "aihub_필수의료_의학지식_데이터/Training/02.라벨링데이터/**/*.json",
+            "file_type": "json"
+        },
+        "valid": {
+            "file_path": "aihub_필수의료_의학지식_데이터/Validation/02.라벨링데이터/**/*.json",
+            "file_type": "json"
+        },
+        "metadata": {
+            "columns": ["qa_id", "domain", "q_type", "question", "answer"]
+        }
+    },
+    "aihub_전문_의학지식_데이터": {
+        "train": {
+            "file_path": "aihub_전문_의학지식_데이터/Training/02.라벨링데이터/**/*.json",
+            "file_type": "json"
+        },
+        "valid": {
+            "file_path": "aihub_전문_의학지식_데이터/Validation/02.라벨링데이터/**/*.json",
+            "file_type": "json"
+        },
+        "metadata": {
+            "columns": ["qa_id", "domain", "q_type", "question", "answer"]
+        }
+    },
+    "sean0042_KorMedMCQA": {
+        "all": {
+            "file_path": "sean0042_KorMedMCQA/**/*.csv",
+            "file_type": "csv"
+        },
+        "metadata": {
+            "columns": ["subject", "year", "period", "q_number", "question", "A", "B", "C", "D", "E", "answer", "cot"]
+        }
+    },
+    "snuh_ClinicalQA": {
+        "train": {
+            "file_path": "snuh_ClinicalQA/train.csv",
+            "file_type": "csv"
+        },
+        "metadata": {
+            "columns": ["question_id", "chief_complaint", "purpose", "question", "exam", "options", "answer", "explanation", "source", "category"]
+        }
+    },
+    "medical_law_qa_dataset": {
+        "all" : {
+            "file_path": "medical_law_qa_dataset/*.jsonl",
+            "file_type": "jsonl"
+        },
+        "metadata": {
+            "columns": ["question", "options", "answer", "reasoning", "article", "law_title", "detailed_option_analysis", "legal_reasoning_and_conclusion", "detailed_analysis", "Legal Framework Analysis", "Detailed Option Analysis", "Legal Reasoning and Conclusion", "Initial Understanding", "detailed option analysis", "conclusion", "detailed reasoning"]
+        }
+    }
+}
