@@ -6,51 +6,34 @@ set -euo  # pipefail 제외
 # ============================================================
 
 WORKSPACE="/workspace"
-SAVE_ROOT="$WORKSPACE/kor_med_opendataset/results/snuh_ClinicalQA_benchmark"
-DATA_PATH="$WORKSPACE/kor_med_opendataset/snuh_ClinicalQA/train.csv"
 
+domain_list=("doctor" "nurse" "dentist" "pharm")
 ## 실험 모델 목록
-CUDA_IDS="0"
-# MODELS=(
-#     "Qwen/Qwen3-0.6B"
-#     "Qwen/Qwen3-1.7B"
-#     "Qwen/Qwen3-4B-Instruct-2507"
-#     "Qwen/Qwen3-8B"
-# )
+CUDA_IDS="1"
+
+# gpu 마다 할당 할 모델 목록
 MODELS=(
-    # "google/medgemma-4b-it"
-    # "google/gemma-3-1b-it"
-    # "google/gemma-3-4b-it"
+    "Qwen/Qwen3-0.6B"
+    "Qwen/Qwen3-1.7B"
+    "Qwen/Qwen3-4B-Instruct-2507"
+    "Qwen/Qwen3-8B"
+    "google/medgemma-4b-it"
+    "google/gemma-3-1b-it"
+    "google/gemma-3-4b-it"
     "google/gemma-3-12b-it"
+    "Qwen/Qwen3-4B-Instruct-2507"
+    "Qwen/Qwen3-8B"
+    "Qwen/Qwen3-14B"
+    "meta-llama/Llama-3.2-1B-Instruct"
+    "meta-llama/Llama-3.2-3B-Instruct"
+    "meta-llama/Llama-3.1-8B-Instruct"
+    "meta-llama/Llama-3-8B-Instruct"
+    "LGAI-EXAONE/EXAONE-4.0-1.2B"
+    "LGAI-EXAONE/EXAONE-3.5-2.4B-Instruct"
+    "LGAI-EXAONE/EXAONE-3.5-7.8B-Instruct"
+    "kakaocorp/kanana-1.5-2.1b-instruct-2505"
+    "kakaocorp/kanana-1.5-8b-instruct-2505"
 )
-# MODELS=(
-#     "meta-llama/Llama-3.2-1B-Instruct"
-#     "meta-llama/Llama-3.2-3B-Instruct"
-#     "meta-llama/Llama-3.1-8B-Instruct"
-#     "meta-llama/Llama-3-8B-Instruct"
-# )
-# MODELS=(
-#     "Qwen/Qwen3-4B-Instruct-2507"
-#     "Qwen/Qwen3-8B"
-#     "Qwen/Qwen3-14B"
-# )
-# MODELS=(
-#     "LGAI-EXAONE/EXAONE-4.0-1.2B"
-#     "LGAI-EXAONE/EXAONE-3.5-2.4B-Instruct"
-#     "LGAI-EXAONE/EXAONE-3.5-7.8B-Instruct"
-# )
-# MODELS=(
-#     "kakaocorp/kanana-1.5-2.1b-instruct-2505"
-#     "kakaocorp/kanana-1.5-8b-instruct-2505"
-# )
-
-
-# 작업 모델 
-
-LOG_DIR="$SAVE_ROOT/logs"
-
-cd "$WORKSPACE"
-mkdir -p "$LOG_DIR"
 
 # ANSI Colors
 BOLD="\033[1m"
@@ -113,7 +96,7 @@ run_model_with_retry() {
         check_gpu_memory "$cuda_ids"
         
         # 실행 및 로그 저장
-        python snuh_ClinicalQA_benchmark.py \
+        python sean0042_KorMedMCQA_benchmark.py \
             --model "$model_id" \
             --data "$data_path" \
             --save_dir "$save_dir" \
@@ -159,44 +142,62 @@ run_model_with_retry() {
     return 1
 }
 
-echo -e "${BOLD}${BLUE}✨ SNUH ClinicalQA Benchmark 시작합니다 ✨${RESET}"
+echo -e "${BOLD}${BLUE}✨ sean0042_KorMedMCQA Benchmark 시작합니다 ✨${RESET}"
 echo
 
-START_TS=$(date +%s)
+TOTAL_START_TS=$(date +%s)
 
-# -------- 실행 루프 --------
-for MODEL_ID in "${MODELS[@]}"; do
+for domain in "${domain_list[@]}"; do
+    echo -e "${BOLD}${YELLOW}------------------ Domain: $domain ------------------${RESET}"
 
-    SAFE_NAME=$(echo "$MODEL_ID" | tr '/.' '_')
-    MODEL_SAVE_DIR="$SAVE_ROOT/$SAFE_NAME"
-    mkdir -p "$MODEL_SAVE_DIR"
+    SAVE_ROOT="$WORKSPACE/kor_med_opendataset/results/sean0042_KorMedMCQA_benchmark/$domain"
+    DATA_PATH="$WORKSPACE/kor_med_opendataset/sean0042_KorMedMCQA/$domain/${domain}_all.csv"
+    LOG_DIR="$SAVE_ROOT/logs"
+    mkdir -p "$LOG_DIR"
+    mkdir -p "$SAVE_ROOT" 
 
-    LOG_FILE="$LOG_DIR/benchmark_${SAFE_NAME}.log"
+    DOMAIN_START_TS=$(date +%s)
 
-    echo -e "${YELLOW}--------------------------------------------------${RESET}"
-    echo -e "${BOLD}모델: ${MODEL_ID}${RESET}"
-    echo -e "결과 저장 위치: ${MODEL_SAVE_DIR}"
-    echo -e "데이터: ${DATA_PATH}"
-    echo -e "로그: ${LOG_FILE}"
-    echo -e "${YELLOW}--------------------------------------------------${RESET}"
-    echo -e "CUDA_IDS: ${CUDA_IDS}"
-    
-    MODEL_START=$(date +%s)
+    # -------- 실행 루프 --------
+    for MODEL_ID in "${MODELS[@]}"; do
 
-    # 재시도 로직이 포함된 모델 실행
-    if run_model_with_retry "$MODEL_ID" "$DATA_PATH" "$MODEL_SAVE_DIR" "$CUDA_IDS" "$LOG_FILE"; then
-        MODEL_END=$(date +%s)
-        echo -e "${GREEN}✅ [$MODEL_ID] 실행 완료 (소요시간: $((MODEL_END - MODEL_START))초)${RESET}"
-        echo
-    else
-        echo -e "${RED}❌ [$MODEL_ID] 실행 실패 (최대 재시도 횟수 초과)${RESET}"
-        echo "로그 파일 확인: $LOG_FILE"
-        echo -e "${YELLOW}⏳ 다음 모델로 진행합니다...${RESET}"
-        echo
-        continue
-    fi
+        SAFE_NAME=$(echo "$MODEL_ID" | tr '/.' '_')
+        MODEL_SAVE_DIR="$SAVE_ROOT/$SAFE_NAME"
+        mkdir -p "$MODEL_SAVE_DIR"
+
+        LOG_FILE="$LOG_DIR/benchmark_${SAFE_NAME}.log"
+
+        echo -e "${YELLOW}--------------------------------------------------${RESET}"
+        echo -e "${BOLD}도메인: ${domain}${RESET}"
+        echo -e "${BOLD}모델: ${MODEL_ID}${RESET}"
+        echo -e "결과 저장 위치: ${MODEL_SAVE_DIR}"
+        echo -e "데이터: ${DATA_PATH}"
+        echo -e "로그: ${LOG_FILE}"
+        echo -e "${YELLOW}--------------------------------------------------${RESET}"
+        echo -e "CUDA_IDS: ${CUDA_IDS}"
+        
+        MODEL_START=$(date +%s)
+
+        # 재시도 로직이 포함된 모델 실행
+        if run_model_with_retry "$MODEL_ID" "$DATA_PATH" "$MODEL_SAVE_DIR" "$CUDA_IDS" "$LOG_FILE"; then
+            MODEL_END=$(date +%s)
+            echo -e "${GREEN}✅ [$domain][$MODEL_ID] 실행 완료 (소요시간: $((MODEL_END - MODEL_START))초)${RESET}"
+            echo
+        else
+            echo -e "${RED}❌ [$domain][$MODEL_ID] 실행 실패 (최대 재시도 횟수 초과)${RESET}"
+            echo "로그 파일 확인: $LOG_FILE"
+            echo -e "${YELLOW}⏳ 다음 모델로 진행합니다...${RESET}"
+            echo
+            continue
+        fi
+    done
+
+    DOMAIN_END_TS=$(date +%s)
+    echo -e "${GREEN}🎉 도메인 [${domain}] 벤치마크 완료! (소요시간: $((DOMAIN_END_TS - DOMAIN_START_TS))초) 🎉${RESET}"
+    echo "결과: $SAVE_ROOT"
+    echo
 done
 
-END_TS=$(date +%s)
-echo -e "${GREEN}🎉 모든 모델 벤치마크 완료! (총 소요시간: $((END_TS - START_TS))초) 🎉${RESET}"
-echo "결과: $SAVE_ROOT"
+TOTAL_END_TS=$(date +%s)
+echo -e "${GREEN}🎊 전체 도메인 벤치마크 완료! (총 소요시간: $((TOTAL_END_TS - TOTAL_START_TS))초) 🎊${RESET}"
+

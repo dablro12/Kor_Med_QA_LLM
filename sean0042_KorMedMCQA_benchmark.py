@@ -7,12 +7,11 @@ import re
 import os
 import pynvml  # GPU 메모리 사용량 측정
 from tqdm import tqdm
-from src.qa_prompt import get_snuh_ClinicalQA_prompt
+from src.qa_prompt import get_sean0042_KorMedMCQA_prompt
 from getpass import getpass
 import os
 
 def parse_model_response(resp: str):
-
     if resp is None:
         return None
 
@@ -33,7 +32,7 @@ def parse_model_response(resp: str):
         if m:
             text = m.group(1).strip()
             break
-
+    
     # ------------------------------------------------------------
     # 2) JSON 객체만 추출 ({ ... })
     # ------------------------------------------------------------
@@ -51,21 +50,51 @@ def parse_model_response(resp: str):
         data = json.loads(text)
     except (json.JSONDecodeError, ValueError) as e:
         # JSON 파싱 실패 시, 정규식으로 직접 필드 추출 시도
+        # answer 필드 추출
         answer_match = re.search(r'"answer"\s*:\s*"([^"]*)"', text)
         
-        # explanation 추출: 닫는 따옴표가 없어도 처리
-        # "explanation":"로 시작해서 끝까지 또는 닫는 따옴표까지
-        explanation_match = re.search(r'"explanation"\s*:\s*"(.*?)(?:"\s*[,}]|$)', text, re.DOTALL)
-        if not explanation_match:
-            # 더 관대한 패턴: "explanation":" 이후 모든 텍스트 (닫는 따옴표 없어도)
-            explanation_match = re.search(r'"explanation"\s*:\s*"(.*)', text, re.DOTALL)
+        # explanation 추출: "explanation":" 이후부터 마지막 } 전까지 추출
+        # 중간에 있는 따옴표는 그대로 유지 (이스케이프되지 않은 따옴표 포함)
+        explanation_text = ""
         
-        explanation_text = explanation_match.group(1) if explanation_match else ""
+        explanation_start_match = re.search(r'"explanation"\s*:\s*"', text)
+        if explanation_start_match:
+            start_pos = explanation_start_match.end()
+            # 마지막 } 찾기
+            last_brace = text.rfind('}')
+            if last_brace > start_pos:
+                # start_pos부터 last_brace 전까지 추출
+                raw_explanation = text[start_pos:last_brace]
+                # 끝부분의 따옴표, 쉼표, 공백 제거
+                explanation_text = raw_explanation.rstrip().rstrip('"').rstrip(',').rstrip('}').strip()
+            else:
+                # }가 없으면 끝까지 추출
+                raw_explanation = text[start_pos:]
+                # 끝부분의 따옴표, 공백 제거
+                explanation_text = raw_explanation.rstrip().rstrip('"').strip()
+        
+        # explanation이 여전히 비어있으면 다른 패턴 시도
+        if not explanation_text:
+            # 패턴: "explanation":"...까지 (닫는 따옴표 찾기, 하지만 중간 따옴표는 무시)
+            # 이 방법은 완벽하지 않지만, 간단한 경우에 작동
+            explanation_match = re.search(r'"explanation"\s*:\s*"(.*?)(?:"\s*[,}]|$)', text, re.DOTALL)
+            if explanation_match:
+                explanation_text = explanation_match.group(1).strip()
         
         if answer_match:
             answer = answer_match.group(1).strip()
             
-            # A-E 선택지 추출
+            # 1-5 숫자 선택지 추출 (KorMedMCQA는 1-5 선택지)
+            option_numbers = re.findall(r'[1-5]', answer)
+            if option_numbers:
+                option_number = option_numbers[0]
+                if option_number in ['1', '2', '3', '4', '5']:
+                    return {
+                        "pred_answer": option_number,
+                        "pred_explanation": explanation_text
+                    }
+            
+            # A-E 선택지 추출 (다른 벤치마크용)
             option_letters = re.findall(r'[A-Ea-e]', answer)
             if option_letters:
                 option_letter = option_letters[0].upper()
@@ -93,30 +122,31 @@ def parse_model_response(resp: str):
     explanation = data.get("explanation", "")
 
     # ------------------------------------------------------------
-    # 5) A-E 선택지 추출 (다양한 형식 지원)
+    # 5) 1~5 선택지 추출 (다양한 형식 지원: "1)", "2", "3/4", "5,4", "1 또는 2" 등)
     # ------------------------------------------------------------
-    # 패턴 1: "A)", "B)", "C)" 형식
-    # 패턴 2: "A/B", "B/E", "A/B/C" 형식
-    # 패턴 3: "A", "B", "C" 단독 형식
-    # 패턴 4: "A) 또는 B)", "A/B/C" 등 복합 형식
+    # 패턴 1: "1)", "2)", "3)" 형식
+    # 패턴 2: "1/2", "3/4", "1,2,3" 형식
+    # 패턴 3: "1", "2", "3" 단독 형식
+    # 패턴 4: "1) 또는 2)", "1/2/3" 등 복합 형식
+
+    # 모든 1-5 숫자 추출 (정답이 1~5 중에 있음)
+    option_numbers = re.findall(r'[1-5]', answer)
     
-    # 모든 A-E 문자 추출
-    option_letters = re.findall(r'[A-Ea-e]', answer)
-    
-    if not option_letters:
+    if not option_numbers:
         return None
     
-    # 첫 번째 유효한 옵션 선택 (대문자로 변환)
-    option_letter = option_letters[0].upper()
+    # 첫 번째 유효한 옵션 선택
+    option_number = option_numbers[0]
     
-    # 유효성 검증 (A-E 범위 내)
-    if option_letter not in ['A', 'B', 'C', 'D', 'E']:
+    # 유효성 검증 (1-5 범위 내)
+    if option_number not in ['1', '2', '3', '4', '5']:
         return None
 
     return {
-        "pred_answer": option_letter,
+        "pred_answer": option_number,
         "pred_explanation": explanation
     }
+
 
 def get_gpu_memory_used(device_idx=0):
     pynvml.nvmlInit()
@@ -211,7 +241,7 @@ class BenchmarkProcessor:
 
         for idx, row in tqdm(self.df.iterrows(), total=len(self.df), desc="Processing QA Benchmark", leave=False):
 
-            prompt = get_snuh_ClinicalQA_prompt(row)
+            prompt = get_sean0042_KorMedMCQA_prompt(row)
 
             t0 = time.time()
             response = self.model.run(prompt, max_new_tokens=512, temperature=0.1, top_p=0.9)
@@ -246,7 +276,7 @@ class BenchmarkProcessor:
             # --------------------------------------------------------
 
             results.append({
-                "question_id": row["question_id"],
+                "question_id": row["question"],
                 "gt_answer": row["answer"],
                 "pred_answer": parsed["pred_answer"],
                 "pred_explanation": parsed["pred_explanation"],
