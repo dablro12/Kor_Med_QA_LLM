@@ -92,7 +92,11 @@ class Qwen:
         
     def run(self, prompt: str, max_new_tokens: int = 256, **generate_kwargs):
         if "qwen3" in self.hg_model_id.lower().strip():
-            return self._run_qwen3_Series(prompt, max_new_tokens=max_new_tokens, **generate_kwargs)
+            return self._run_qwen3_Series(
+                prompt,
+                # max_new_tokens=max_new_tokens,
+                **generate_kwargs,
+            )
         else:
             raise ValueError(f"Unsupported model: {self.hg_model_id}")
 

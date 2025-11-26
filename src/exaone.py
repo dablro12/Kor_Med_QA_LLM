@@ -81,7 +81,7 @@ class Exaone:
         outputs = self.model.generate(
             input_ids.to(self.device),
             eos_token_id=self.tokenizer.eos_token_id,
-            max_new_tokens=max_new_tokens,
+            # max_new_tokens=max_new_tokens,
             do_sample=kwargs.get("do_sample", False),
             **{k: v for k, v in kwargs.items() if k != "do_sample"}
         )

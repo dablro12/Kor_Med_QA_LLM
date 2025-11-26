@@ -88,7 +88,7 @@ class Kanana:
 
         # generation 파라미터 설정
         gen_kwargs = {
-            "max_new_tokens": max_new_tokens,
+            # "max_new_tokens": max_new_tokens,
             "temperature": temperature,
             "top_p": top_p,
             "num_beams": num_beams,

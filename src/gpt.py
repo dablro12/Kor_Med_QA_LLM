@@ -31,7 +31,7 @@ class GPT:
         
         outputs = self.pipe(
             messages,
-            max_new_tokens=256,
+            # max_new_tokens=256,
         )
         return outputs[0]["generated_text"][-1]
         

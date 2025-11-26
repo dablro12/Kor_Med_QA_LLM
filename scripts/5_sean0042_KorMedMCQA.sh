@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euo  # pipefail 제외
+set -eu  # pipefail 제외
 
 # ============================================================
 # SNUH ClinicalQA Benchmark Runner (with OOM cooldown & CUDA setting)
@@ -9,30 +9,27 @@ WORKSPACE="/workspace"
 
 domain_list=("doctor" "nurse" "dentist" "pharm")
 ## 실험 모델 목록
-CUDA_IDS="1"
+CUDA_IDS="0"
 
 # gpu 마다 할당 할 모델 목록
 MODELS=(
-    "Qwen/Qwen3-0.6B"
-    "Qwen/Qwen3-1.7B"
-    "Qwen/Qwen3-4B-Instruct-2507"
-    "Qwen/Qwen3-8B"
-    "google/medgemma-4b-it"
-    "google/gemma-3-1b-it"
-    "google/gemma-3-4b-it"
-    "google/gemma-3-12b-it"
-    "Qwen/Qwen3-4B-Instruct-2507"
-    "Qwen/Qwen3-8B"
-    "Qwen/Qwen3-14B"
-    "meta-llama/Llama-3.2-1B-Instruct"
+    # "Qwen/Qwen3-0.6B"
+    # "Qwen/Qwen3-1.7B"
+    # "Qwen/Qwen3-4B-Instruct-2507"
+    # "Qwen/Qwen3-8B"
+    # "Qwen/Qwen3-14B"
+    # "google/medgemma-4b-it"
+    # "google/gemma-3-1b-it"
+    # "google/gemma-3-4b-it"
+    # "meta-llama/Llama-3.2-1B-Instruct"
+    # "kakaocorp/kanana-1.5-2.1b-instruct-2505"
     "meta-llama/Llama-3.2-3B-Instruct"
-    "meta-llama/Llama-3.1-8B-Instruct"
-    "meta-llama/Llama-3-8B-Instruct"
     "LGAI-EXAONE/EXAONE-4.0-1.2B"
     "LGAI-EXAONE/EXAONE-3.5-2.4B-Instruct"
     "LGAI-EXAONE/EXAONE-3.5-7.8B-Instruct"
-    "kakaocorp/kanana-1.5-2.1b-instruct-2505"
     "kakaocorp/kanana-1.5-8b-instruct-2505"
+    "meta-llama/Llama-3.1-8B-Instruct"
+    "meta-llama/Meta-Llama-3-8B-Instruct"
 )
 
 # ANSI Colors

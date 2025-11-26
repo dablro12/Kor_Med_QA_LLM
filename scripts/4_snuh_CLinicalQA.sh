@@ -10,7 +10,7 @@ SAVE_ROOT="$WORKSPACE/kor_med_opendataset/results/snuh_ClinicalQA_benchmark"
 DATA_PATH="$WORKSPACE/kor_med_opendataset/snuh_ClinicalQA/train.csv"
 
 ## 실험 모델 목록
-CUDA_IDS="0"
+CUDA_IDS="1"
 # MODELS=(
 #     "Qwen/Qwen3-0.6B"
 #     "Qwen/Qwen3-1.7B"
@@ -21,7 +21,6 @@ MODELS=(
     # "google/medgemma-4b-it"
     # "google/gemma-3-1b-it"
     # "google/gemma-3-4b-it"
-    "google/gemma-3-12b-it"
 )
 # MODELS=(
 #     "meta-llama/Llama-3.2-1B-Instruct"

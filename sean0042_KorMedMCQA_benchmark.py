@@ -118,7 +118,8 @@ def parse_model_response(resp: str):
     if "answer" not in data:
         return None
 
-    answer = data["answer"].strip()
+    # 모델이 숫자 등 문자열 이외 타입으로 응답하는 경우가 있어 문자열로 강제 변환
+    answer = str(data["answer"]).strip()
     explanation = data.get("explanation", "")
 
     # ------------------------------------------------------------

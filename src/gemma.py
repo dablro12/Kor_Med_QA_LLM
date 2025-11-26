@@ -72,7 +72,7 @@ class Gemma:
 
         outputs = self.pipe(
             messages,
-            max_new_tokens=max_new_tokens,
+            # max_new_tokens=max_new_tokens,
             **kwargs
         )
 
