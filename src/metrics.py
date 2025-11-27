@@ -26,9 +26,10 @@ class ClinicalQAEvaluator:
     def _prepare_metrics(self):
         """
         정답 여부 계산
+        gt_answer, pred_answer가 문자나 숫자 등 다른 타입이어도 자동으로 올바르게 비교됩니다.
         """
-        # 일반적으로 gt_answer, pred_answer가 문자(예: 'C')로 같으면 정답
-        self.df["is_correct"] = self.df["gt_answer"] == self.df["pred_answer"]
+        # gt_answer와 pred_answer가 각각 int/float/str일 수 있으므로, 이를 문자열로 비교
+        self.df["is_correct"] = self.df["gt_answer"].astype(str) == self.df["pred_answer"].astype(str)
 
     def summary(self) -> pd.DataFrame:
         """
@@ -60,10 +61,9 @@ class ClinicalQAEvaluator:
         """
         혼동 행렬(optional)
         """
-        # 분류값이 문자형으로 잘 들어있다면 정상적으로 ct가 작동함
+        # gt_answer, pred_answer가 숫자여도 정상적으로 동작 (자동 형변환 적용)
         try:
-            return pd.crosstab(self.df["gt_answer"], self.df["pred_answer"])
+            return pd.crosstab(self.df["gt_answer"].astype(str), self.df["pred_answer"].astype(str))
         except Exception as e:
             print(f"Confusion matrix error: {e}")
             return None
-# End: 검토 코멘트
