@@ -7,7 +7,7 @@ import re
 import os
 import pynvml  # GPU 메모리 사용량 측정
 from tqdm import tqdm
-from src.qa_prompt import get_sean0042_KorMedMCQA_prompt
+from src.qa_prompt import get_aihub_필수의료_의학지식_데이터_prompt as get_prompt
 from getpass import getpass
 import os
 
@@ -172,13 +172,11 @@ class BenchmarkProcessor:
         print("📌 Counting model parameters... (only once)")
         self.num_params = sum(p.numel() for p in self.model.model.parameters())
         print(f"📌 Total Parameters: {self.num_params:,}")
-
     def _load_data(self):
         self.df = pd.read_csv(self.data_path)
 
     def run(self):
         self._load_data()
-
         
         results = []
         total_tokens = 0
@@ -189,7 +187,7 @@ class BenchmarkProcessor:
 
         for idx, row in tqdm(self.df.iterrows(), total=len(self.df), desc="Processing QA Benchmark", leave=False):
 
-            prompt = get_sean0042_KorMedMCQA_prompt(row)
+            prompt = get_prompt(row)
 
             t0 = time.time()
             response = self.model.run(prompt, max_new_tokens=512, temperature=0.1, top_p=0.9)
@@ -222,10 +220,9 @@ class BenchmarkProcessor:
 
             cost_per_token = full_time / D if D > 0 else None
             # --------------------------------------------------------
-
-            results.append({
-                "question_id": row["question"],
-                "gt_answer": row["answer"],
+            result = {
+                "question_id": row["qa_id"],
+                "gt_answer": row["answer"][0].strip(),
                 "pred_answer": parsed["pred_answer"],
                 "pred_explanation": parsed["pred_explanation"],
                 "first_token_latency_s": first_token_latency,
@@ -235,8 +232,14 @@ class BenchmarkProcessor:
                 # FLOPs 기록
                 "flops_this": flops_this,
                 "flops_per_token": flops_per_token,
-                "cost_per_token_s": cost_per_token
-            })
+                "cost_per_token_s": cost_per_token,
+                
+                "domain": row["domain"],
+                "q_type": row["q_type"],
+                "question": row["question"]
+            }
+            results.append(result)
+            
 
         total_time = time.time() - start_time_total
         throughput = total_tokens / total_time if total_time > 0 else None
@@ -278,7 +281,7 @@ class BenchmarkProcessor:
 if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(description="SNUH ClinicalQA Benchmark Runner")
+    parser = argparse.ArgumentParser(description="aihub_필수의료_의학지식_데이터 Benchmark Runner")
 
     parser.add_argument(
         "--model",
@@ -290,7 +293,7 @@ if __name__ == "__main__":
         "--data",
         type=str,
         required=True,
-        help="Path to ClinicalQA CSV file"
+        help="Path to aihub_필수의료_의학지식_데이터 CSV file"
     )
     parser.add_argument(
         "--save_dir",
@@ -316,6 +319,7 @@ if __name__ == "__main__":
     else:
         print("🔧 CUDA_VISIBLE_DEVICES not set, using default (all available GPUs)")
 
+    
     parquet_path = os.path.join(args.save_dir, f"{args.model.replace('/', '_')}_detailed.parquet")
     if os.path.exists(parquet_path):
         print(f"🔥 {parquet_path} already exists. BenchmarkProcessor will not run.")

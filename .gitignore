@@ -228,3 +228,6 @@ tester.ipynb
 
 .env 
 
+*.png 
+*.jpg
+*.pdf

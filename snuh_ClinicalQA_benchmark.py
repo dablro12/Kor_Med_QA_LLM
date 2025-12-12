@@ -128,6 +128,7 @@ def get_gpu_memory_used(device_idx=0):
     pynvml.nvmlShutdown()
     return used, total
 
+from src._Model_Loader import load_model
 class BenchmarkProcessor:
     def __init__(self, hg_model_id: str, data_path: str, save_dir: str):
         self.hg_model_id = hg_model_id
@@ -135,71 +136,16 @@ class BenchmarkProcessor:
         self.save_dir = save_dir
         # 저장 디렉토리 생성
         os.makedirs(self.save_dir, exist_ok=True)
-        
-    def _load_model(self):
-        if "qwen" in self.hg_model_id.lower():
-            from src.qwen import Qwen
-            self.model = Qwen(
-                hg_model_id=self.hg_model_id,
-                device="cuda",
-                cache_dir="/workspace/kor_med_opendataset/hg_cache"
-            )
-        elif "gpt" in self.hg_model_id.lower():
-            from src.gpt import GPT
-            self.model = GPT(
-                hg_model_id=self.hg_model_id,
-                device="cuda",
-                cache_dir="/workspace/kor_med_opendataset/hg_cache"
-            )
-        elif "deepseek" in self.hg_model_id.lower():
-            from src.deepseek import DeepSeek
-            self.model = DeepSeek(
-                hg_model_id=self.hg_model_id,
-                device="cuda",
-                cache_dir="/workspace/kor_med_opendataset/hg_cache"
-            )
-        elif "gemma" in self.hg_model_id.lower():
-            from src.gemma import Gemma
-            self.model = Gemma(
-                hg_model_id=self.hg_model_id,
-                device="cuda",
-                cache_dir="/workspace/kor_med_opendataset/hg_cache"
-            )
-        elif "llama" in self.hg_model_id.lower():
-            from src.llama import Llama
-            self.model = Llama(
-                hg_model_id=self.hg_model_id,
-                device="cuda",
-                cache_dir="/workspace/kor_med_opendataset/hg_cache"
-            )
-        elif "exaone" in self.hg_model_id.lower():
-            from src.exaone import Exaone
-            self.model = Exaone(
-                hg_model_id=self.hg_model_id,
-                device="cuda",
-                cache_dir="/workspace/kor_med_opendataset/hg_cache"
-            )
-        elif "kanana" in self.hg_model_id.lower():
-            from src.kanana import Kanana
-            self.model = Kanana(
-                hg_model_id=self.hg_model_id,
-                device="cuda",
-                cache_dir="/workspace/kor_med_opendataset/hg_cache"
-            )
-        else:
-            raise ValueError(f"Unsupported model: {self.hg_model_id}")
 
         # 🔥 파라미터 수 캐싱 (HF 모델 본체는 self.model.model)
-        hf_model = self.model.model
+        self.model = load_model(self.hg_model_id)
         print("📌 Counting model parameters... (only once)")
-        self.num_params = sum(p.numel() for p in hf_model.parameters())
+        self.num_params = sum(p.numel() for p in self.model.model.parameters())
         print(f"📌 Total Parameters: {self.num_params:,}")
-
     def _load_data(self):
         self.df = pd.read_csv(self.data_path)
 
     def run(self):
-        self._load_model()
         self._load_data()
 
         
@@ -338,6 +284,11 @@ if __name__ == "__main__":
         print(f"🔧 Using existing CUDA_VISIBLE_DEVICES: {os.environ['CUDA_VISIBLE_DEVICES']}")
     else:
         print("🔧 CUDA_VISIBLE_DEVICES not set, using default (all available GPUs)")
+
+    parquet_path = os.path.join(args.save_dir, f"{args.model.replace('/', '_')}_detailed.parquet")
+    if os.path.exists(parquet_path):
+        print(f"🔥 {parquet_path} already exists. BenchmarkProcessor will not run.")
+        exit()
 
     processor = BenchmarkProcessor(
         hg_model_id=args.model,
