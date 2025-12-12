@@ -227,7 +227,10 @@ tester.ipynb
 
 
 .env 
-
+benchmark/*.md
 *.png 
 *.jpg
 *.pdf
+*.csv
+
+!benchmark/*.png
