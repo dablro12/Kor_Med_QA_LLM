@@ -237,3 +237,6 @@ benchmark/*.md
 !benchmark/*.csv
 !benchmark/*.md
 
+
+# agent/session scratch
+.superpowers/
