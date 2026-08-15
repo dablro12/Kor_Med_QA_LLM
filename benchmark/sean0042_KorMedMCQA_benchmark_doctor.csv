@@ -1,0 +1,26 @@
+model_group,model_name,accuracy (%),avg_time_per_token (s),mean_flops (GFlops)
+K-intelligence,Midm-2_0-Mini-Instruct,45.08,0.014,1065.253
+K-intelligence,Midm-2_0-Base-Instruct,58.94,0.367,6482.057
+LGAI-EXAONE,EXAONE-3_5-2_4B-Instruct,40.27,0.009,288.622
+LGAI-EXAONE,EXAONE-4_0-1_2B,42.86,0.011,153.495
+LGAI-EXAONE,EXAONE-3_5-7_8B-Instruct,50.7,0.02,938.235
+Qwen,Qwen3-0_6B,28.13,0.01,361.69
+Qwen,Qwen3-1_7B,37.12,0.01,1719.952
+Qwen,Qwen3-4B-Instruct-2507,53.39,0.015,7851.507
+Qwen,Qwen3-8B,56.03,0.025,8561.902
+google,gemma-3-1b-it,24.78,0.02,1310.785
+google,gemma-3-4b-it,42.35,0.027,5356.819
+google,gemma-3n-E2B-it,45.27,0.03,6964.839
+google,medgemma-4b-it,46.36,0.027,5065.83
+google,gemma-3n-E4B-it,52.74,0.045,10228.387
+kakaocorp,kanana-1_5-2_1b-instruct-2505,45.14,0.012,249.837
+kakaocorp,kanana-1_5-8b-instruct-2505,53.9,0.022,953.033
+meta-llama,Llama-3_2-1B-Instruct,24.95,0.006,1071.578
+meta-llama,Llama-3_2-3B-Instruct,34.49,0.011,2054.402
+meta-llama,Meta-Llama-3-8B-Instruct,39.89,0.02,5624.172
+meta-llama,Llama-3_1-8B-Instruct,42.85,0.02,6438.361
+naver-hyperclovax,HyperCLOVAX-SEED-Text-Instruct-0_5B,31.03,0.019,452.043
+naver-hyperclovax,HyperCLOVAX-SEED-Text-Instruct-1_5B,33.75,0.011,1305.735
+prism-ml,Bonsai-27B-1bit,33.84,0.011,30956.668
+prism-ml,Ternary-Bonsai-27B,53.46,0.017,39611.92
+upstage,SOLAR-10_7B-Instruct-v1_0,43.54,0.127,7490.88

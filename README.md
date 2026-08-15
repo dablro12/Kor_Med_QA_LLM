@@ -16,6 +16,8 @@ The following tables show benchmark results for each dataset, including accuracy
 
 ![SNUH ClinicalQA Benchmark](benchmark/snuh_ClinicalQA_benchmark.png)
 
+
+
 | model_group | model_name | accuracy (%) | avg_time_per_token (s) | mean_flops (GFlops) |
 |----|----|----|----|----|
 | K-intelligence | Midm-2_0-Mini-Instruct | 54.17 | 0.024 | 1021.289 |
@@ -40,7 +42,10 @@ The following tables show benchmark results for each dataset, including accuracy
 | meta-llama | Llama-3_1-8B-Instruct | 56.08 | 0.024 | 7541.13 |
 | naver-hyperclovax | HyperCLOVAX-SEED-Text-Instruct-1_5B | 41.63 | 0.01 | 1322.43 |
 | naver-hyperclovax | HyperCLOVAX-SEED-Text-Instruct-0_5B | 42.04 | 0.011 | 479.408 |
+| prism-ml | Bonsai-27B-1bit | 48.42 | 0.011 | 29415.324 |
+| prism-ml | Ternary-Bonsai-27B | 70.33 | 0.017 | 38980.456 |
 | upstage | SOLAR-10_7B-Instruct-v1_0 | 50.68 | 0.033 | 9346.172 |
+
 
 </details>
 
@@ -48,6 +53,8 @@ The following tables show benchmark results for each dataset, including accuracy
 <summary><b>KorMedMCQA - Doctor</b> (Click to expand)</summary>
 
 ![KorMedMCQA Doctor Benchmark](benchmark/sean0042_KorMedMCQA_benchmark_doctor.png)
+
+
 
 | model_group | model_name | accuracy (%) | avg_time_per_token (s) | mean_flops (GFlops) |
 |----|----|----|----|----|
@@ -73,7 +80,10 @@ The following tables show benchmark results for each dataset, including accuracy
 | meta-llama | Llama-3_1-8B-Instruct | 42.85 | 0.02 | 6438.361 |
 | naver-hyperclovax | HyperCLOVAX-SEED-Text-Instruct-0_5B | 31.03 | 0.019 | 452.043 |
 | naver-hyperclovax | HyperCLOVAX-SEED-Text-Instruct-1_5B | 33.75 | 0.011 | 1305.735 |
+| prism-ml | Bonsai-27B-1bit | 33.84 | 0.011 | 30956.668 |
+| prism-ml | Ternary-Bonsai-27B | 53.46 | 0.017 | 39611.92 |
 | upstage | SOLAR-10_7B-Instruct-v1_0 | 43.54 | 0.127 | 7490.88 |
+
 
 </details>
 
@@ -81,6 +91,8 @@ The following tables show benchmark results for each dataset, including accuracy
 <summary><b>KorMedMCQA - Nurse</b> (Click to expand)</summary>
 
 ![KorMedMCQA Nurse Benchmark](benchmark/sean0042_KorMedMCQA_benchmark_nurse.png)
+
+
 
 | model_group | model_name | accuracy (%) | avg_time_per_token (s) | mean_flops (GFlops) |
 |----|----|----|----|----|
@@ -106,7 +118,10 @@ The following tables show benchmark results for each dataset, including accuracy
 | meta-llama | Llama-3_1-8B-Instruct | 56.1 | 0.02 | 4976.065 |
 | naver-hyperclovax | HyperCLOVAX-SEED-Text-Instruct-0_5B | 46.07 | 0.012 | 357.542 |
 | naver-hyperclovax | HyperCLOVAX-SEED-Text-Instruct-1_5B | 46.42 | 0.011 | 1007.87 |
+| prism-ml | Bonsai-27B-1bit | 44.4 | 0.012 | 20922.379 |
+| prism-ml | Ternary-Bonsai-27B | 59.74 | 0.015 | 25310.784 |
 | upstage | SOLAR-10_7B-Instruct-v1_0 | 55.23 | 0.107 | 5916.325 |
+
 
 </details>
 
@@ -114,6 +129,8 @@ The following tables show benchmark results for each dataset, including accuracy
 <summary><b>KorMedMCQA - Dentist</b> (Click to expand)</summary>
 
 ![KorMedMCQA Dentist Benchmark](benchmark/sean0042_KorMedMCQA_benchmark_dentist.png)
+
+
 
 | model_group | model_name | accuracy (%) | avg_time_per_token (s) | mean_flops (GFlops) |
 |----|----|----|----|----|
@@ -139,7 +156,10 @@ The following tables show benchmark results for each dataset, including accuracy
 | meta-llama | Llama-3_1-8B-Instruct | 41.19 | 0.02 | 4666.221 |
 | naver-hyperclovax | HyperCLOVAX-SEED-Text-Instruct-0_5B | 28.54 | 0.012 | 361.934 |
 | naver-hyperclovax | HyperCLOVAX-SEED-Text-Instruct-1_5B | 33.9 | 0.012 | 988.616 |
+| prism-ml | Bonsai-27B-1bit | 31.01 | 0.012 | 23669.859 |
+| prism-ml | Ternary-Bonsai-27B | 35.82 | 0.014 | 27649.727 |
 | upstage | SOLAR-10_7B-Instruct-v1_0 | 38.5 | 0.108 | 5703.901 |
+
 
 </details>
 
@@ -147,6 +167,8 @@ The following tables show benchmark results for each dataset, including accuracy
 <summary><b>KorMedMCQA - Pharm</b> (Click to expand)</summary>
 
 ![KorMedMCQA Pharm Benchmark](benchmark/sean0042_KorMedMCQA_benchmark_pharm.png)
+
+
 
 | model_group | model_name | accuracy (%) | avg_time_per_token (s) | mean_flops (GFlops) |
 |----|----|----|----|----|
@@ -172,7 +194,10 @@ The following tables show benchmark results for each dataset, including accuracy
 | meta-llama | Llama-3_1-8B-Instruct | 57.69 | 0.02 | 5511.361 |
 | naver-hyperclovax | HyperCLOVAX-SEED-Text-Instruct-0_5B | 33.83 | 0.012 | 386.261 |
 | naver-hyperclovax | HyperCLOVAX-SEED-Text-Instruct-1_5B | 34.63 | 0.01 | 1156.326 |
+| prism-ml | Bonsai-27B-1bit | 43.75 | 0.012 | 25481.853 |
+| prism-ml | Ternary-Bonsai-27B | 60.23 | 0.014 | 29626.915 |
 | upstage | SOLAR-10_7B-Instruct-v1_0 | 57.82 | 0.133 | 5088.664 |
+
 
 </details>
 
@@ -180,6 +205,8 @@ The following tables show benchmark results for each dataset, including accuracy
 <summary><b>AIHub Professional Medical Knowledge (Multiple Choice)</b> (Click to expand)</summary>
 
 ![AIHub Professional Medical Knowledge Benchmark](benchmark/aihub_전문_의학지식_데이터_benchmark_객관식.png)
+
+
 
 | model_group | model_name | accuracy (%) | avg_time_per_token (s) | mean_flops (GFlops) |
 |----|----|----|----|----|
@@ -204,7 +231,10 @@ The following tables show benchmark results for each dataset, including accuracy
 | meta-llama | Llama-3_1-8B-Instruct | 66.14 | 0.027 | 5295.684 |
 | naver-hyperclovax | HyperCLOVAX-SEED-Text-Instruct-0_5B | 47.69 | 0.012 | 360.587 |
 | naver-hyperclovax | HyperCLOVAX-SEED-Text-Instruct-1_5B | 53.94 | 0.011 | 1080.065 |
+| prism-ml | Bonsai-27B-1bit | 61.07 | 0.03 | 23474.911 |
+| prism-ml | Ternary-Bonsai-27B | 68.39 | 0.015 | 27161.501 |
 | upstage | SOLAR-10_7B-Instruct-v1_0 | 64.22 | 0.106 | 6748.665 |
+
 
 </details>
 
@@ -212,6 +242,8 @@ The following tables show benchmark results for each dataset, including accuracy
 <summary><b>AIHub Essential Medical Knowledge (Multiple Choice)</b> (Click to expand)</summary>
 
 ![AIHub Essential Medical Knowledge Benchmark](benchmark/aihub_필수의료_의학지식_데이터_benchmark_객관식.png)
+
+
 
 | model_group | model_name | accuracy (%) | avg_time_per_token (s) | mean_flops (GFlops) |
 |----|----|----|----|----|
@@ -236,7 +268,10 @@ The following tables show benchmark results for each dataset, including accuracy
 | meta-llama | Llama-3_1-8B-Instruct | 64.58 | 0.02 | 5491.641 |
 | naver-hyperclovax | HyperCLOVAX-SEED-Text-Instruct-0_5B | 44.97 | 0.014 | 381.43 |
 | naver-hyperclovax | HyperCLOVAX-SEED-Text-Instruct-1_5B | 50.42 | 0.012 | 1125.338 |
+| prism-ml | Bonsai-27B-1bit | 59.9 | 0.043 | 24894.901 |
+| prism-ml | Ternary-Bonsai-27B | 68.93 | 0.014 | 28912.669 |
 | upstage | SOLAR-10_7B-Instruct-v1_0 | 63.65 | 0.101 | 7085.255 |
+
 
 </details>
 
