@@ -234,3 +234,7 @@ benchmark/*.md
 *.csv
 
 !benchmark/*.png
+!benchmark/*.csv
+!benchmark/*.md
+
+docs 
