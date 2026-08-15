@@ -237,4 +237,3 @@ benchmark/*.md
 !benchmark/*.csv
 !benchmark/*.md
 
-docs 

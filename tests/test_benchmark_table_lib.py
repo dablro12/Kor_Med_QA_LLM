@@ -12,6 +12,8 @@ from scripts.benchmark_table_lib import (
     replace_readme_table,
     split_model_folder,
     summarize_dataset,
+    sync_readme,
+    verify_bonsai_rows,
     write_csv_md,
 )
 
@@ -173,3 +175,101 @@ def test_write_csv_md(tmp_path: Path):
     loaded = pd.read_csv(csv_path)
     assert list(loaded.columns) == DISPLAY_COLS
     assert "Ternary-Bonsai-27B" in md_path.read_text(encoding="utf-8")
+
+
+def test_sync_readme_replaces_all_dataset_tables(tmp_path: Path):
+    datasets = [
+        {
+            "stem": "snuh_ClinicalQA_benchmark",
+            "readme_summary_substr": "SNUH ClinicalQA",
+        },
+        {
+            "stem": "sean0042_KorMedMCQA_benchmark_doctor",
+            "readme_summary_substr": "KorMedMCQA - Doctor",
+        },
+    ]
+    readme = tmp_path / "README.md"
+    readme.write_text(
+        """<details>
+<summary><b>SNUH ClinicalQA</b> (Click to expand)</summary>
+
+![SNUH](benchmark/snuh_ClinicalQA_benchmark.png)
+
+| model_group | model_name | accuracy (%) | avg_time_per_token (s) | mean_flops (GFlops) |
+|----|----|----|----|----|
+| Qwen | Qwen3-8B | 63.72 | 0.021 | 12645.159 |
+
+</details>
+
+<details>
+<summary><b>KorMedMCQA - Doctor</b> (Click to expand)</summary>
+
+![Doctor](benchmark/sean0042_KorMedMCQA_benchmark_doctor.png)
+
+| model_group | model_name | accuracy (%) | avg_time_per_token (s) | mean_flops (GFlops) |
+|----|----|----|----|----|
+| Qwen | Qwen3-8B | 50.0 | 0.02 | 1.0 |
+
+</details>
+""",
+        encoding="utf-8",
+    )
+    bench = tmp_path / "benchmark"
+    bench.mkdir()
+    (bench / "snuh_ClinicalQA_benchmark.md").write_text(
+        "| model_group | model_name |\n|----|----|\n| prism-ml | Ternary-Bonsai-27B |\n",
+        encoding="utf-8",
+    )
+    (bench / "sean0042_KorMedMCQA_benchmark_doctor.md").write_text(
+        "| model_group | model_name |\n|----|----|\n| prism-ml | Bonsai-27B-1bit |\n",
+        encoding="utf-8",
+    )
+    sync_readme(readme, bench, datasets=datasets)
+    text = readme.read_text(encoding="utf-8")
+    assert "Ternary-Bonsai-27B" in text
+    assert "Bonsai-27B-1bit" in text
+    assert "![SNUH](benchmark/snuh_ClinicalQA_benchmark.png)" in text
+    assert "Qwen3-8B" not in text
+
+
+def test_verify_bonsai_rows_ok(tmp_path: Path):
+    datasets = [{"stem": "snuh_ClinicalQA_benchmark"}]
+    csv = tmp_path / "snuh_ClinicalQA_benchmark.csv"
+    csv.write_text(
+        "model_group,model_name,accuracy (%)\n"
+        "prism-ml,Ternary-Bonsai-27B,70.33\n"
+        "prism-ml,Bonsai-27B-1bit,40.0\n",
+        encoding="utf-8",
+    )
+    png = tmp_path / "snuh_ClinicalQA_benchmark.png"
+    png.write_bytes(b"x" * 10_001)
+    verify_bonsai_rows(tmp_path, datasets=datasets)
+
+
+def test_verify_bonsai_rows_missing_model(tmp_path: Path):
+    datasets = [{"stem": "snuh_ClinicalQA_benchmark"}]
+    csv = tmp_path / "snuh_ClinicalQA_benchmark.csv"
+    csv.write_text(
+        "model_group,model_name,accuracy (%)\n"
+        "prism-ml,Ternary-Bonsai-27B,70.33\n",
+        encoding="utf-8",
+    )
+    png = tmp_path / "snuh_ClinicalQA_benchmark.png"
+    png.write_bytes(b"x" * 10_001)
+    with pytest.raises(AssertionError, match="missing"):
+        verify_bonsai_rows(tmp_path, datasets=datasets)
+
+
+def test_verify_bonsai_rows_tiny_png(tmp_path: Path):
+    datasets = [{"stem": "snuh_ClinicalQA_benchmark"}]
+    csv = tmp_path / "snuh_ClinicalQA_benchmark.csv"
+    csv.write_text(
+        "model_group,model_name,accuracy (%)\n"
+        "prism-ml,Ternary-Bonsai-27B,70.33\n"
+        "prism-ml,Bonsai-27B-1bit,40.0\n",
+        encoding="utf-8",
+    )
+    png = tmp_path / "snuh_ClinicalQA_benchmark.png"
+    png.write_bytes(b"tiny")
+    with pytest.raises(AssertionError, match="png"):
+        verify_bonsai_rows(tmp_path, datasets=datasets)
