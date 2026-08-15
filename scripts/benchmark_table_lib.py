@@ -1,9 +1,18 @@
 from __future__ import annotations
 
 import re
+import sys
+from glob import glob
+from pathlib import Path
 from typing import Iterable
 
 import pandas as pd
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from src.metrics import ClinicalQAEvaluator
 
 DISPLAY_NAME_OVERRIDES = {
     "prism-ml_Ternary-Bonsai-27B-gguf": ("prism-ml", "Ternary-Bonsai-27B"),
@@ -87,6 +96,28 @@ def dataframe_to_markdown(df: pd.DataFrame, cols: Iterable[str]) -> str:
     for _, row in df[cols].iterrows():
         lines.append("| " + " | ".join(str(x) for x in row.values) + " |")
     return "\n".join(lines) + "\n"
+
+
+def summarize_dataset(results_dir: Path) -> pd.DataFrame:
+    results_dir = Path(results_dir)
+    rows = []
+    for parquet_file in sorted(glob(str(results_dir / "*" / "*_detailed.parquet"))):
+        folder = Path(parquet_file).parent.name
+        ev = ClinicalQAEvaluator(parquet_file)
+        summary_df = ev.summary()
+        summary_df.insert(0, "model", folder)
+        rows.append(summary_df)
+    if not rows:
+        raise FileNotFoundError(f"No *_detailed.parquet under {results_dir}")
+    return pd.concat(rows, ignore_index=True)
+
+
+def write_csv_md(display_df: pd.DataFrame, out_dir: Path, stem: str) -> None:
+    out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    display_df[DISPLAY_COLS].to_csv(out_dir / f"{stem}.csv", index=False)
+    md = dataframe_to_markdown(display_df, DISPLAY_COLS)
+    (out_dir / f"{stem}.md").write_text(md, encoding="utf-8")
 
 
 def replace_readme_table(readme_text: str, summary_substr: str, new_md_table: str) -> str:
