@@ -1,0 +1,26 @@
+| model_group | model_name | accuracy (%) | avg_time_per_token (s) | mean_flops (GFlops) |
+|----|----|----|----|----|
+| K-intelligence | Midm-2_0-Mini-Instruct | 57.45 | 0.021 | 893.552 |
+| LGAI-EXAONE | EXAONE-4_0-1_2B | 60.71 | 0.01 | 153.443 |
+| LGAI-EXAONE | EXAONE-3_5-2_4B-Instruct | 64.5 | 0.009 | 288.617 |
+| LGAI-EXAONE | EXAONE-3_5-7_8B-Instruct | 70.57 | 0.02 | 938.211 |
+| Qwen | Qwen3-0_6B | 42.62 | 0.01 | 305.757 |
+| Qwen | Qwen3-1_7B | 55.8 | 0.015 | 1460.862 |
+| Qwen | Qwen3-4B-Instruct-2507 | 70.11 | 0.014 | 5543.094 |
+| Qwen | Qwen3-8B | 73.57 | 0.022 | 8600.286 |
+| google | gemma-3-1b-it | 43.46 | 0.012 | 1217.534 |
+| google | gemma-3-4b-it | 61.74 | 0.016 | 4999.471 |
+| google | gemma-3n-E2B-it | 64.7 | 0.028 | 6154.676 |
+| google | medgemma-4b-it | 67.35 | 0.017 | 3533.915 |
+| google | gemma-3n-E4B-it | 68.73 | 0.031 | 9222.913 |
+| kakaocorp | kanana-1_5-2_1b-instruct-2505 | 61.75 | 0.012 | 250.213 |
+| kakaocorp | kanana-1_5-8b-instruct-2505 | 67.96 | 0.021 | 962.875 |
+| meta-llama | Llama-3_2-1B-Instruct | 35.16 | 0.005 | 1253.731 |
+| meta-llama | Llama-3_2-3B-Instruct | 56.02 | 0.01 | 2492.153 |
+| meta-llama | Meta-Llama-3-8B-Instruct | 61.45 | 0.02 | 4758.564 |
+| meta-llama | Llama-3_1-8B-Instruct | 64.58 | 0.02 | 5491.641 |
+| naver-hyperclovax | HyperCLOVAX-SEED-Text-Instruct-0_5B | 44.97 | 0.014 | 381.43 |
+| naver-hyperclovax | HyperCLOVAX-SEED-Text-Instruct-1_5B | 50.42 | 0.012 | 1125.338 |
+| prism-ml | Bonsai-27B-1bit | 59.9 | 0.043 | 24894.901 |
+| prism-ml | Ternary-Bonsai-27B | 68.93 | 0.014 | 28912.669 |
+| upstage | SOLAR-10_7B-Instruct-v1_0 | 63.65 | 0.101 | 7085.255 |
