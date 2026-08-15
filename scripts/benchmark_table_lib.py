@@ -3,10 +3,21 @@ from __future__ import annotations
 import re
 import sys
 from glob import glob
+from itertools import cycle
 from pathlib import Path
 from typing import Iterable
 
+import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
+import seaborn as sns
+
+try:
+    from adjustText import adjust_text
+
+    HAS_ADJUST_TEXT = True
+except ImportError:
+    HAS_ADJUST_TEXT = False
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
@@ -145,3 +156,127 @@ def replace_readme_table(readme_text: str, summary_substr: str, new_md_table: st
     if n != 1:
         raise ValueError(f"Could not find <details> for summary={summary_substr!r}")
     return out
+
+
+def set_nature_style() -> None:
+    plt.rcParams.update(
+        {
+            "font.family": "sans-serif",
+            "font.sans-serif": ["Helvetica", "Arial", "DejaVu Sans"],
+            "axes.edgecolor": "black",
+            "axes.linewidth": 1.2,
+            "axes.labelsize": 14,
+            "xtick.labelsize": 12,
+            "ytick.labelsize": 12,
+            "xtick.direction": "out",
+            "ytick.direction": "out",
+            "grid.color": "#d0d0d0",
+            "grid.linewidth": 0.8,
+            "grid.linestyle": "--",
+            "figure.dpi": 300,
+        }
+    )
+
+
+def plot_medical_llm_benchmark_nature(
+    df: pd.DataFrame,
+    x_col: str = "mean_flops",
+    y_col: str = "accuracy (%)",
+    model_col: str = "model",
+    figsize: tuple[float, float] = (11, 7),
+    dpi: int = 300,
+    title: str = "Medical Domain Evaluation of Open-Source Small Large Language Models",
+    save_path: str | Path | None = "NEJM_style_plot.png",
+) -> None:
+    set_nature_style()
+
+    plot_df = df.copy()
+    plot_df[x_col] = plot_df[x_col] / 1e9
+    plot_df["Group"] = [split_model_folder(m)[0] for m in plot_df[model_col]]
+    plot_df["Short Name"] = [split_model_folder(m)[1] for m in plot_df[model_col]]
+
+    unique_groups = plot_df["Group"].unique()
+    palette_colors = [
+        "#1f77b4",
+        "#2ca02c",
+        "#d62728",
+        "#9467bd",
+        "#8c564b",
+        "#17becf",
+        "#ff7f0e",
+        "#bcbd22",
+        "#e377c2",
+        "#7f7f7f",
+        "#aec7e8",
+        "#ffbb78",
+        "#98df8a",
+        "#ff9896",
+        "#c5b0d5",
+    ]
+    palette = {g: c for g, c in zip(unique_groups, cycle(palette_colors))}
+
+    fig, ax = plt.subplots(figsize=figsize, dpi=dpi, constrained_layout=True)
+
+    sorted_df = plot_df.sort_values(by=x_col)
+    pareto_points = []
+    current_max = -np.inf
+    for _, row in sorted_df.iterrows():
+        if row[y_col] > current_max:
+            pareto_points.append((row[x_col], row[y_col]))
+            current_max = row[y_col]
+
+    if len(pareto_points) > 0:
+        px, py = zip(*pareto_points)
+        ax.plot(px, py, "--", color="#777777", linewidth=1.2, alpha=0.7)
+
+    sns.scatterplot(
+        data=plot_df,
+        x=x_col,
+        y=y_col,
+        hue="Group",
+        palette=palette,
+        style="Group",
+        markers=True,
+        s=140,
+        edgecolor="black",
+        linewidth=0.8,
+        ax=ax,
+    )
+
+    ax.set_xscale("log")
+    ax.set_xlabel("Computational Cost (GFLOPs, log-scale)", fontsize=14, labelpad=10)
+    ax.set_ylabel("Accuracy (%)", fontsize=14, labelpad=10)
+    ax.set_title(title, fontsize=16, fontweight="bold", pad=12)
+    ax.grid(True, alpha=0.3)
+    ax.legend(title="Model Family", frameon=False, fontsize=11, title_fontsize=12)
+
+    texts = []
+    for _, row in plot_df.iterrows():
+        t = ax.text(
+            row[x_col],
+            row[y_col],
+            row["Short Name"],
+            fontsize=10,
+            color="black",
+            ha="center",
+            va="bottom",
+        )
+        texts.append(t)
+
+    if HAS_ADJUST_TEXT:
+        adjust_text(
+            texts,
+            ax=ax,
+            arrowprops=dict(arrowstyle="-", color="gray", lw=0.5, alpha=0.6),
+            force_text=(0.3, 0.4),
+        )
+
+    ax.margins(x=0.15, y=0.1)
+
+    if save_path:
+        save_path = Path(save_path)
+        save_path.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(save_path, dpi=dpi, bbox_inches="tight")
+        print(f"✔ Saved to: {save_path}")
+
+    plt.close(fig)

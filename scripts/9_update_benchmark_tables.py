@@ -9,6 +9,7 @@ from scripts.benchmark_table_lib import (
     DISPLAY_COLS,
     dataframe_to_markdown,
     display_frame,
+    plot_medical_llm_benchmark_nature,
     summarize_dataset,
     write_csv_md,
 )
@@ -35,6 +36,11 @@ def main() -> None:
         if not args.dry_run:
             write_csv_md(disp, BENCH, ds["stem"])
             print(f"wrote {ds['stem']}.csv/md")
+        if not args.dry_run and not args.skip_plot:
+            plot_medical_llm_benchmark_nature(
+                summary,
+                save_path=BENCH / f"{ds['stem']}.png",
+            )
 
 
 if __name__ == "__main__":
