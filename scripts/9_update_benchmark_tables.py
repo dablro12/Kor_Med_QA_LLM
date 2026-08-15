@@ -4,6 +4,8 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
+import pandas as pd
+
 from scripts.benchmark_table_lib import (
     DATASETS,
     DISPLAY_COLS,
@@ -11,8 +13,11 @@ from scripts.benchmark_table_lib import (
     display_frame,
     plot_medical_llm_benchmark_nature,
     summarize_dataset,
+    sync_readme,
+    verify_bonsai_rows,
     write_csv_md,
 )
+from src.metrics import ClinicalQAEvaluator
 
 ROOT = Path(__file__).resolve().parents[1]
 RESULTS = ROOT / "kor_med_opendataset" / "results"
@@ -41,6 +46,29 @@ def main() -> None:
                 summary,
                 save_path=BENCH / f"{ds['stem']}.png",
             )
+
+    if not args.dry_run and not args.skip_readme:
+        sync_readme(ROOT / "README.md", BENCH)
+        print("synced README.md")
+
+    if not args.dry_run:
+        verify_bonsai_rows(BENCH)
+        parquet = (
+            RESULTS
+            / "snuh_ClinicalQA_benchmark"
+            / "prism-ml_Ternary-Bonsai-27B-gguf"
+            / "prism-ml_Ternary-Bonsai-27B-gguf_detailed.parquet"
+        )
+        acc = ClinicalQAEvaluator(str(parquet)).summary()["accuracy (%)"].iloc[0]
+        csv = pd.read_csv(BENCH / "snuh_ClinicalQA_benchmark.csv")
+        row = csv[
+            (csv.model_group == "prism-ml") & (csv.model_name == "Ternary-Bonsai-27B")
+        ].iloc[0]
+        if abs(float(row["accuracy (%)"]) - float(acc)) > 0.01:
+            raise AssertionError(
+                f"SNUH Ternary accuracy mismatch csv={row['accuracy (%)']} parquet={acc}"
+            )
+        print("verified Bonsai rows + pngs + SNUH Ternary accuracy")
 
 
 if __name__ == "__main__":

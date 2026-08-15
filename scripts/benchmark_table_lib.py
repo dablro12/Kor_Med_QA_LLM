@@ -158,6 +158,27 @@ def replace_readme_table(readme_text: str, summary_substr: str, new_md_table: st
     return out
 
 
+def sync_readme(readme_path: Path, benchmark_dir: Path, datasets=DATASETS) -> None:
+    text = readme_path.read_text(encoding="utf-8")
+    for ds in datasets:
+        md_table = (benchmark_dir / f"{ds['stem']}.md").read_text(encoding="utf-8")
+        text = replace_readme_table(text, ds["readme_summary_substr"], md_table)
+    readme_path.write_text(text, encoding="utf-8")
+
+
+def verify_bonsai_rows(benchmark_dir: Path, datasets=DATASETS) -> None:
+    required = {("prism-ml", "Ternary-Bonsai-27B"), ("prism-ml", "Bonsai-27B-1bit")}
+    for ds in datasets:
+        df = pd.read_csv(benchmark_dir / f"{ds['stem']}.csv")
+        got = set(zip(df["model_group"], df["model_name"]))
+        missing = required - got
+        if missing:
+            raise AssertionError(f"{ds['stem']} missing {missing}")
+        png = benchmark_dir / f"{ds['stem']}.png"
+        if not png.exists() or png.stat().st_size < 10_000:
+            raise AssertionError(f"bad/missing png for {ds['stem']}")
+
+
 def set_nature_style() -> None:
     plt.rcParams.update(
         {
